@@ -28,8 +28,6 @@
 
 ## Installation
 
-HOLA SOY GOKU
-
 ```bash
 $ npm install
 ```

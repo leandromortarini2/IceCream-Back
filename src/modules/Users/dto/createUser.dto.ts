@@ -2,7 +2,6 @@ import {
   IsEmail,
   IsNotEmpty,
   IsString,
-  IsStrongPassword,
   Length,
   Matches,
   MaxLength,
@@ -10,52 +9,52 @@ import {
 } from 'class-validator';
 
 export class createUserDto {
-  @IsNotEmpty({ message: 'Username should not be empty' })
-  @IsString({ message: 'Username must be a string' })
+  @IsNotEmpty({ message: 'Username no debe ser vacio' })
+  @IsString({ message: 'Username debe ser un string' })
   @Matches(/^[a-zA-Z0-9]+$/, {
-    message: 'Username must contain only letters and numbers',
+    message: 'Username debe contener solo numeros y letras',
   })
-  @MinLength(3, { message: 'Username must be at least 3 characters long' })
+  @MinLength(3, { message: 'Username, longitud de mas de 3 carateres' })
   username: string;
 
-  @IsNotEmpty({ message: 'Password should not be empty' })
-  @IsString({ message: 'Password must be a string' })
+  @IsNotEmpty({ message: 'Password no debe estar vacio' })
+  @IsString({ message: 'Password debe ser un string' })
   @Matches(
     /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/,
     {
       message:
-        'Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be between 8 and 15 characters long',
+        'Password debe contener al menos una letra Mayuscula, una minuscula, un caracter especial, un numero y debe tener una longitud entre 6 a 15 caracteres.',
     },
   )
   password: string;
 
-  @IsNotEmpty({ message: 'Name should not be empty' })
-  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Nombre no debe estar vacio' })
+  @IsString({ message: 'Nombere debe ser un string' })
   @Matches(/^[A-Za-z\s]+$/, {
-    message: 'Name must contain only letters and spaces',
+    message: 'Nombre debe contener solo letras, puede tener espacios',
   })
-  @MinLength(3, { message: 'Name must be at least 3 characters long' })
-  @MaxLength(30, { message: 'Name must be no longer than 30 characters' })
+  @MinLength(3, { message: 'Longitud minima 3 caracteres' })
+  @MaxLength(30, { message: 'Longitud maxima 30 characters' })
   name: string;
 
-  @IsNotEmpty({ message: 'Sucursal should not be empty' })
-  @IsString({ message: 'Sucursal must be a string' })
+  @IsNotEmpty({ message: 'Sucursal no debe estar vacia' })
+  @IsString({ message: 'Sucursal debe ser un string' })
   @Matches(/^[A-Za-z0-9\s]+$/, {
-    message: 'Sucursal must contain only letters, numbers, and spaces',
+    message: 'Sucursal puede conetener numeros,letras y espacios',
   })
   @Length(2, 30, {
-    message: 'Sucursal must be between 2 and 30 characters long',
+    message: 'Sucursal, longitud en 2 a 30 caracteres',
   })
   sucursal: string;
 
-  @IsNotEmpty({ message: 'Email should not be empty' })
-  @IsEmail({}, { message: 'Email must be a valid email address' })
+  @IsNotEmpty({ message: 'Email no debe estar vacio' })
+  @IsEmail({}, { message: 'Email valido' })
   email: string;
 
-  @IsNotEmpty({ message: 'Phone should not be empty' })
-  @IsString({ message: 'Phone must be a string' })
+  @IsNotEmpty({ message: 'Phone no debe estar' })
+  @IsString({ message: 'Phone debe ser un string' })
   @Matches(/^[0-9]+$/, {
-    message: 'Phone must contain only numbers and be positive',
+    message: 'Phone contiene solo numeros positivos',
   })
   phone: string;
 }

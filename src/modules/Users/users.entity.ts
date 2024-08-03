@@ -44,11 +44,11 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  last_login: Date;
+  @Column({ type: 'timestamp', nullable: true, name: 'last_login' })
+  lastLogin: Date;
 
   @BeforeInsert()
   generateId() {

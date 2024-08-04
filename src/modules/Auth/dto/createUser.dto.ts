@@ -1,6 +1,7 @@
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Length,
   Matches,
@@ -37,7 +38,7 @@ export class createUserDto {
   @MaxLength(30, { message: 'Longitud maxima 30 characters' })
   name: string;
 
-  @IsNotEmpty({ message: 'Sucursal no debe estar vacia' })
+  @IsOptional()
   @IsString({ message: 'Sucursal debe ser un string' })
   @Matches(/^[A-Za-z0-9\s]+$/, {
     message: 'Sucursal puede conetener numeros,letras y espacios',
@@ -45,7 +46,7 @@ export class createUserDto {
   @Length(2, 30, {
     message: 'Sucursal, longitud en 2 a 30 caracteres',
   })
-  sucursal: string;
+  sucursal?: string;
 
   @IsNotEmpty({ message: 'Email no debe estar vacio' })
   @IsEmail({}, { message: 'Email valido' })

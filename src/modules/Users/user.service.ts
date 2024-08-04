@@ -7,8 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './users.entity';
 import { Repository } from 'typeorm';
-import { createUserDto } from './dto/createUser.dto';
-import { loginUserDto } from './dto/loginUser.dto';
+import { createUserDto } from '../Auth/dto/createUser.dto';
+import { loginUserDto } from '../Auth/dto/loginUser.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 

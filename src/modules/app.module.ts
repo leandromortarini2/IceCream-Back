@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { UserModule } from './Users/user.module';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './Auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET,
     }),
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [],

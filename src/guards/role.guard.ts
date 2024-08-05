@@ -27,7 +27,7 @@ export class RoleGuard implements CanActivate {
 
     const valid = user && user.role && hasRole();
     if (!valid) {
-      throw new UnauthorizedException('Not access, not permission');
+      throw new UnauthorizedException('Sin acceso');
     }
     return valid;
   }

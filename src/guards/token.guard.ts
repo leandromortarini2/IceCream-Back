@@ -17,7 +17,7 @@ export class TokenGuard implements CanActivate {
     console.log(request);
     const token = request.headers['authorization']?.split(' ')[1] ?? '';
 
-    if (!token) throw new UnauthorizedException('bearer token is required');
+    if (!token) throw new UnauthorizedException('Token Requerido');
 
     try {
       const secret = process.env.JWT_SECRET;
@@ -29,7 +29,7 @@ export class TokenGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Invalid Token' + error.message);
+      throw new UnauthorizedException('Token invalido' + error.message);
     }
   }
 }

@@ -8,10 +8,10 @@ export class Flavour {
     @PrimaryGeneratedColumn()
     id: ULID;
 
-    @Column()
+    @Column({unique: true})
     name: string;
 
-    @Column()
+    @Column({default: false})
     state: boolean;
 
     @OneToMany(() => Category, (category) => category.id)

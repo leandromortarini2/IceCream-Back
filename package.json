@@ -26,8 +26,10 @@
     "migrations:revert": "npm run typeorm -- migration:revert"
   },
   "dependencies": {
+
     "@clerk/clerk-sdk-node": "^5.0.26",
     "@nestjs-modules/mailer": "^1.6.1",
+
     "@nestjs/class-transformer": "^0.4.0",
     "@nestjs/class-validator": "^0.13.4",
     "@nestjs/common": "^10.0.0",

@@ -14,10 +14,20 @@ export class TokenGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    console.log(request);
-    const token = request.headers['authorization']?.split(' ')[1] ?? '';
 
-    if (!token) throw new UnauthorizedException('Token Requerido');
+    const authHeader = request.headers['authorization'];
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header required');
+    }
+    const [bearer, token] = authHeader.split(' ');
+
+    if (bearer !== 'Bearer') {
+      throw new UnauthorizedException('Bearer token required');
+    }
+
+    if (!token) {
+      throw new UnauthorizedException('Token required');
+    }
 
     try {
       const secret = process.env.JWT_SECRET;

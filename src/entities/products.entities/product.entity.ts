@@ -5,10 +5,10 @@ import { Category } from './category.entity';
 
 @Entity({ name: 'products' })
 export class Product {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({primaryKeyConstraintName: 'product_pkey'})
     id: ULID;
 
-    @Column()
+    @Column({unique: true})
     name: string;
 
     @Column({default: 'Aun no se ha agregado una descripción'})
@@ -17,7 +17,7 @@ export class Product {
     @Column()
     price: number;
 
-    @Column()
+    @Column({default: 'https://ibb.co/n1whqyQ'})
     image: string;
 
     @Column({default: false})

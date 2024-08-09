@@ -6,6 +6,6 @@ export class Category {
     @PrimaryGeneratedColumn()
     id: ULID;
 
-    @Column()
+    @Column({unique: true})
     name: string;
 }

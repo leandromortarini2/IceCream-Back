@@ -23,9 +23,9 @@ export class UserService {
   ) {}
 
   async loginUser(login: loginUserDto) {
-    console.log(login.user_id);
-    let user;
-    const clientList = await clerk.users.getUser(login.user_id);
+    console.log(login.userId);
+    let user: User;
+    const clientList = await clerk.users.getUser(login.userId);
     if (!clientList) throw new NotFoundException('User Clerk not found');
     console.log(clientList);
     const { firstName, lastName, emailAddresses } = clientList;

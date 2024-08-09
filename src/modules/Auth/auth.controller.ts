@@ -14,7 +14,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @UseInterceptors(LoginInterceptor)
+  //@UseInterceptors(LoginInterceptor)
   signIn(@Body() login: loginUserDto) {
     return this.authService.signIn(login);
   }

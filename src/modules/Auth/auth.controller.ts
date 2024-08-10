@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { createUserDto } from './dto/createUser.dto';
 import { loginUserDto } from './dto/loginUser.dto';
+import { LoginInterceptor } from 'src/interceptor/login.interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -13,6 +14,7 @@ export class AuthController {
   }
 
   @Post('login')
+  //@UseInterceptors(LoginInterceptor)
   signIn(@Body() login: loginUserDto) {
     return this.authService.signIn(login);
   }

@@ -23,11 +23,9 @@ export class UserService {
   ) {}
 
   async loginUser(login: loginUserDto) {
-    console.log(login.userId);
     let user: User;
     const clientList = await clerk.users.getUser(login.userId);
-    if (!clientList) throw new NotFoundException('User Clerk not found');
-    console.log(clientList);
+    if (!clientList) throw new NotFoundException('Usuario Clerk no encontrado')
     const { firstName, lastName, emailAddresses } = clientList;
     const userEmail = emailAddresses[0].emailAddress;
 
@@ -94,7 +92,7 @@ export class UserService {
 
       const hashPassword = await bcrypt.hash(user.password, 10);
       if (!hashPassword)
-        throw new BadRequestException('Password could not be hashed');
+        throw new BadRequestException('Password no pudo ser hasheada');
 
       const newUser = this.userRepository.create({
         ...user,

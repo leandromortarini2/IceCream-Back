@@ -17,16 +17,16 @@ export class TokenGuard implements CanActivate {
 
     const authHeader = request.headers['authorization'];
     if (!authHeader) {
-      throw new UnauthorizedException('Authorization header required');
+      throw new UnauthorizedException('Debe iniciar sesion');
     }
     const [bearer, token] = authHeader.split(' ');
 
     if (bearer !== 'Bearer') {
-      throw new UnauthorizedException('Bearer token required');
+      throw new UnauthorizedException('Bearer token requerido');
     }
 
     if (!token) {
-      throw new UnauthorizedException('Token required');
+      throw new UnauthorizedException('Token requerido');
     }
 
     try {

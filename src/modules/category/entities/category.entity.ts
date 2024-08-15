@@ -21,7 +21,6 @@ export class Category {
 
   @BeforeInsert()
   generateId() {
-    console.log('BeforeInsert hook called');
     this.id = ulid();
   }
 }

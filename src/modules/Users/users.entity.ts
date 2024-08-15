@@ -55,7 +55,6 @@ export class User {
 
   @BeforeInsert()
   generateId() {
-    console.log('BeforeInsert hook called');
     this.id = ulid();
   }
 }

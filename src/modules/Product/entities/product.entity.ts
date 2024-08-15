@@ -39,7 +39,6 @@ export class Product {
   category: Category;
   @BeforeInsert()
   generateId() {
-    console.log('BeforeInsert hook called');
     this.id = ulid();
   }
 }

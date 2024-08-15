@@ -24,7 +24,6 @@ export class Flavour {
 
   @BeforeInsert()
   generateId() {
-    console.log('BeforeInsert hook called');
     this.id = ulid();
   }
 }

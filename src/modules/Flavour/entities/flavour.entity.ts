@@ -13,10 +13,10 @@ export class Flavour {
   @PrimaryColumn({ type: 'varchar', length: 26 })
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true })
   name: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: true })
   state: boolean;
 
   @OneToMany(() => Product, (product) => product.flavour)

@@ -13,7 +13,7 @@ export class Category {
   @PrimaryColumn({ type: 'varchar', length: 26 })
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true })
   name: string;
 
   @OneToMany(() => Product, (product) => product.category)

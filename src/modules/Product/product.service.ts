@@ -1,26 +1,78 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from './entities/product.entity';
+import { Repository } from 'typeorm';
+import { FlavourService } from '../Flavour/flavour.service';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    @InjectRepository(Product) private productRepository: Repository<Product>,
+    private flavourService: FlavourService,
+    private categoryService: CategoryService,
+  ) {}
+  async create(createProductDto: CreateProductDto) {
+    const category = await this.categoryService.getCategory(
+      createProductDto.categoryId,
+    );
+    if (!category) throw new NotFoundException('Categoria no existe!');
+    const flavour = await this.flavourService.getFlavour(
+      createProductDto.flavourId,
+    );
+    if (!flavour) throw new NotFoundException('Sabor no existe!');
+
+    const existsNameProduct = await this.productRepository.findOne({
+      where: { name: createProductDto.name },
+    });
+    if (existsNameProduct)
+      throw new ConflictException('Nombre de producto duplicado');
+
+    const newProduct = await this.productRepository.create({
+      ...createProductDto,
+      flavour,
+      category,
+    });
+    const savedProduct = await this.productRepository.save(newProduct);
+    return { msg: 'Producto Creado!', savedProduct };
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll() {
+    return await this.productRepository.find({
+      relations: { category: true, flavour: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+    return existsProduct;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+    await this.productRepository.update(id, { ...updateProductDto });
+    return { msg: `Producto #${id} actualizado` };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+    await this.productRepository.remove(existsProduct);
+    return `Producto #${id} eliminado`;
+  }
+  async getProduct(id: string) {
+    const product = await this.productRepository.findOne({
+      where: { id: id },
+      relations: { category: true, flavour: true },
+    });
+    return product;
   }
 }

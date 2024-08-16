@@ -6,18 +6,46 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  FileTypeValidator,
+  MaxFileSizeValidator,
+  ParseFilePipe,
+  UploadedFile,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { minSizeFile } from 'src/pipes/miSizeFile.pipe';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @UseInterceptors(FileInterceptor('img'))
+  @UsePipes(minSizeFile)
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false,
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 300000,
+            message: 'Archivo debe ser menor a 300Kb',
+          }),
+          new FileTypeValidator({
+            fileType: /(jpg)|(jpeg)|(png)|(webp)$/,
+          }),
+        ],
+      }),
+    )
+    img: Express.Multer.File,
+  ) {
+    return this.productService.create(createProductDto, img);
   }
 
   @Get()

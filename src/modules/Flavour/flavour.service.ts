@@ -31,29 +31,29 @@ export class FlavourService {
   }
 
   async findOne(id: string) {
-    const flavour = await this.getFlavour(id);
+    const flavour = await this.getFlavour(id, true);
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
     return flavour;
   }
 
   async update(id: string, updateFlavourDto: UpdateFlavourDto) {
-    const flavour = await this.getFlavour(id);
+    const flavour = await this.getFlavour(id, true);
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
     await this.flavourRepository.update(id, { ...updateFlavourDto });
     return { msg: `Sabor ${id} actualizado` };
   }
 
   async remove(id: string) {
-    const flavour = await this.getFlavour(id);
+    const flavour = await this.getFlavour(id, true);
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
     await this.flavourRepository.remove(flavour);
     return `Sabor #${id} Borrado`;
   }
 
-  async getFlavour(id: string) {
+  async getFlavour(id: string, relation: boolean) {
     const existFlavor = await this.flavourRepository.findOne({
       where: { id: id },
-      relations: { products: true },
+      relations: { products: relation },
     });
     return existFlavor;
   }

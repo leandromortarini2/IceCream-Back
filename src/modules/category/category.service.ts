@@ -34,29 +34,29 @@ export class CategoryService {
   }
 
   async findOne(id: string) {
-    const existsCategory = await this.getCategory(id);
+    const existsCategory = await this.getCategory(id, true);
     if (!existsCategory) throw new NotFoundException('Categoria no existe!');
     return existsCategory;
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    const existsCategory = await this.getCategory(id);
+    const existsCategory = await this.getCategory(id, true);
     if (!existsCategory) throw new NotFoundException('Categoria no existe!');
     await this.categoryRepository.update(id, { ...updateCategoryDto });
     return { msg: `Categoria ${id} actualizada` };
   }
 
   async remove(id: string) {
-    const existsCategory = await this.getCategory(id);
+    const existsCategory = await this.getCategory(id, true);
     if (!existsCategory) throw new NotFoundException('Categoria no existe!');
     await this.categoryRepository.remove(existsCategory);
     return `Categoria #${id} Eliminada`;
   }
 
-  async getCategory(id: string) {
+  async getCategory(id: string, relation: boolean) {
     const existsCategory = await this.categoryRepository.findOne({
       where: { id: id },
-      relations: { products: true },
+      relations: { products: relation },
     });
     return existsCategory;
   }

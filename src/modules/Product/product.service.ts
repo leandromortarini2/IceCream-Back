@@ -1,5 +1,7 @@
 import {
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,6 +12,7 @@ import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { FlavourService } from '../Flavour/flavour.service';
 import { CategoryService } from '../category/category.service';
+import { FileUpload } from '../cloudinary/fileUpload.cloudinary';
 
 @Injectable()
 export class ProductService {
@@ -17,14 +20,17 @@ export class ProductService {
     @InjectRepository(Product) private productRepository: Repository<Product>,
     private flavourService: FlavourService,
     private categoryService: CategoryService,
+    private fileUploadService: FileUpload,
   ) {}
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, img) {
     const category = await this.categoryService.getCategory(
       createProductDto.categoryId,
+      false,
     );
     if (!category) throw new NotFoundException('Categoria no existe!');
     const flavour = await this.flavourService.getFlavour(
       createProductDto.flavourId,
+      false,
     );
     if (!flavour) throw new NotFoundException('Sabor no existe!');
 
@@ -34,8 +40,21 @@ export class ProductService {
     if (existsNameProduct)
       throw new ConflictException('Nombre de producto duplicado');
 
+    let imgUrl = null;
+    if (img) {
+      const imgUpload = await this.fileUploadService.uploadImg(img);
+      if (!imgUpload) {
+        throw new HttpException(
+          'Error al subir la imagen',
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
+      imgUrl = imgUpload.url;
+    }
+
     const newProduct = await this.productRepository.create({
       ...createProductDto,
+      image: imgUrl,
       flavour,
       category,
     });

@@ -21,33 +21,33 @@ export class FlavourService {
     if (existsFlavour) throw new ConflictException('Sabor duplicado');
 
     const newFlavour = await this.flavourRepository.create(createFlavourDto);
-    const savedFlavour = await this.flavourRepository.save(newFlavour);
+    await this.flavourRepository.save(newFlavour);
 
-    return { msg: 'Nuevo Sabor Creado', savedFlavour };
+    return { message: 'Nuevo Sabor Creado' };
   }
 
   async findAll() {
-    return await this.flavourRepository.find({ relations: { products: true } });
+    return await this.flavourRepository.find();
   }
 
   async findOne(id: string) {
-    const flavour = await this.getFlavour(id, true);
+    const flavour = await this.getFlavour(id, false);
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
     return flavour;
   }
 
   async update(id: string, updateFlavourDto: UpdateFlavourDto) {
-    const flavour = await this.getFlavour(id, true);
+    const flavour = await this.getFlavour(id, false);
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
     await this.flavourRepository.update(id, { ...updateFlavourDto });
-    return { msg: `Sabor ${id} actualizado` };
+    return { message: `Sabor ${id} actualizado` };
   }
 
   async remove(id: string) {
-    const flavour = await this.getFlavour(id, true);
+    const flavour = await this.getFlavour(id, false);
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
     await this.flavourRepository.remove(flavour);
-    return `Sabor #${id} Borrado`;
+    return { message: `Sabor #${id} Borrado` };
   }
 
   async getFlavour(id: string, relation: boolean) {

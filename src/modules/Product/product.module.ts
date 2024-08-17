@@ -5,12 +5,16 @@ import { CategoryModule } from '../category/category.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { FlavourModule } from '../Flavour/flavour.module';
-import { CloudinaryConfig } from 'src/config/cloudinary.config';
-import { FileUpload } from '../cloudinary/fileUpload.cloudinary';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product]), CategoryModule, FlavourModule],
+  imports: [
+    TypeOrmModule.forFeature([Product]),
+    CategoryModule,
+    FlavourModule,
+    CloudinaryModule,
+  ],
   controllers: [ProductController],
-  providers: [ProductService, CloudinaryConfig, FileUpload],
+  providers: [ProductService],
 })
 export class ProductModule {}

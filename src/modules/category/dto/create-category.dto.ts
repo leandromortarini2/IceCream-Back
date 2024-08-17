@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
+  @Matches(/^[A-Za-z]+$/, { message: 'Solo Letras' })
   name: string;
 }

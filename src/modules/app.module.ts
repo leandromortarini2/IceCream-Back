@@ -9,6 +9,7 @@ import { AuthModule } from './Auth/auth.module';
 import { ProductModule } from './Product/product.module';
 import { FlavourModule } from './Flavour/flavour.module';
 import { CategoryModule } from './category/category.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CategoryModule } from './category/category.module';
     ProductModule,
     FlavourModule,
     CategoryModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [],

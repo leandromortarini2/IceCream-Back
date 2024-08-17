@@ -16,7 +16,7 @@ export class Flavour {
   @Column({ type: 'varchar', unique: true })
   name: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', default: false })
   state: boolean;
 
   @OneToMany(() => Product, (product) => product.flavour)

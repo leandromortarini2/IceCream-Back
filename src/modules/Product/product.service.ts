@@ -12,7 +12,8 @@ import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { FlavourService } from '../Flavour/flavour.service';
 import { CategoryService } from '../category/category.service';
-import { FileUpload } from '../cloudinary/fileUpload.cloudinary';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { extractPublicIdFromUrl } from 'src/utils/extractPublicId.utils';
 
 @Injectable()
 export class ProductService {
@@ -20,9 +21,9 @@ export class ProductService {
     @InjectRepository(Product) private productRepository: Repository<Product>,
     private flavourService: FlavourService,
     private categoryService: CategoryService,
-    private fileUploadService: FileUpload,
+    private cloudinaryService: CloudinaryService,
   ) {}
-  async create(createProductDto: CreateProductDto, img) {
+  async create(createProductDto: CreateProductDto, image) {
     const category = await this.categoryService.getCategory(
       createProductDto.categoryId,
       false,
@@ -41,8 +42,8 @@ export class ProductService {
       throw new ConflictException('Nombre de producto duplicado');
 
     let imgUrl = null;
-    if (img) {
-      const imgUpload = await this.fileUploadService.uploadImg(img);
+    if (image) {
+      const imgUpload = await this.cloudinaryService.uploadImg(image);
       if (!imgUpload) {
         throw new HttpException(
           'Error al subir la imagen',
@@ -58,8 +59,8 @@ export class ProductService {
       flavour,
       category,
     });
-    const savedProduct = await this.productRepository.save(newProduct);
-    return { msg: 'Producto Creado!', savedProduct };
+    await this.productRepository.save(newProduct);
+    return { message: 'Producto Creado!' };
   }
 
   async findAll() {
@@ -68,25 +69,66 @@ export class ProductService {
     });
   }
 
-  async findOne(id: string) {
-    const existsProduct = await this.getProduct(id);
+  async findOne(name: string) {
+    const existsProduct = await this.productRepository.findOne({
+      where: { name },
+      relations: { category: true, flavour: true },
+    });
     if (!existsProduct) throw new NotFoundException('Producto no encontrado');
     return existsProduct;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, image) {
     const existsProduct = await this.getProduct(id);
     if (!existsProduct) throw new NotFoundException('Producto no encontrado');
-    await this.productRepository.update(id, { ...updateProductDto });
+
+    if (updateProductDto.name) {
+      const duplicate = await this.productRepository.findOne({
+        where: { name: updateProductDto.name },
+      });
+
+      if (duplicate) {
+        throw new ConflictException('Nombre de producto duplicado');
+      }
+    }
+
+    let imgUrl = existsProduct.image;
+    if (image) {
+      //*Extrar id img para eliminarla en cloudinary
+      if (existsProduct.image !== null) {
+        const publicId = extractPublicIdFromUrl(existsProduct.image);
+        await this.cloudinaryService.deleteImage(publicId);
+      }
+
+      const imgUpload = await this.cloudinaryService.uploadImg(image);
+      if (!imgUpload) {
+        throw new HttpException(
+          'Error al subir la imagen',
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
+      imgUrl = imgUpload.url;
+    }
+
+    await this.productRepository.update(id, {
+      ...updateProductDto,
+      image: imgUrl,
+    });
     return { msg: `Producto #${id} actualizado` };
   }
 
   async remove(id: string) {
     const existsProduct = await this.getProduct(id);
     if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+
+    //*Extrar id img para eliminarla en cloudinary
+    const publicId = extractPublicIdFromUrl(existsProduct.image);
+    await this.cloudinaryService.deleteImage(publicId);
+
     await this.productRepository.remove(existsProduct);
-    return `Producto #${id} eliminado`;
+    return { message: `Producto #${id} eliminado` };
   }
+
   async getProduct(id: string) {
     const product = await this.productRepository.findOne({
       where: { id: id },

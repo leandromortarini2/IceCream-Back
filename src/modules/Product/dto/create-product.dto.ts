@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   MaxLength,
 } from 'class-validator';
 
@@ -13,11 +14,17 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
+  @Matches(/^[a-zA-Z0-9 ]*$/, {
+    message: 'El nombre solo puede contener letras, números y espacios',
+  })
   name: string;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(250)
+  @Matches(/^[a-zA-Z0-9 ]*$/, {
+    message: 'El nombre solo puede contener letras, números y espacios',
+  })
   description: string;
 
   @Type(() => Number)

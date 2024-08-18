@@ -40,6 +40,15 @@ export class CategoryService {
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const existsCategory = await this.getCategory(id, true);
     if (!existsCategory) throw new NotFoundException('Categoria no existe!');
+
+    if (updateCategoryDto.name) {
+      const duplicate = await this.categoryRepository.findOne({
+        where: { name: updateCategoryDto.name },
+      });
+      if (duplicate)
+        throw new ConflictException('Nombre de categoria duplicado');
+    }
+
     await this.categoryRepository.update(id, { ...updateCategoryDto });
     return { message: `Categoria ${id} actualizada` };
   }

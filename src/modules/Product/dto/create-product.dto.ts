@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
@@ -15,7 +15,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   @MaxLength(50)
   @Matches(/^[a-zA-Z0-9 ]*$/, {
-    message: 'El nombre solo puede contener letras, números y espacios',
+    message: 'El nombre solo puede contener letras, números',
   })
   name: string;
 

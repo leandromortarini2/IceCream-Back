@@ -4,6 +4,6 @@ export class CreateCategoryDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
-  @Matches(/^[A-Za-z]+$/, { message: 'Solo Letras' })
+  @Matches(/^[A-Za-z0-9 ]+$/, { message: 'Solo letras y números' })
   name: string;
 }

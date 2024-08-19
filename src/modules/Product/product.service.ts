@@ -77,9 +77,6 @@ export class ProductService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto, image) {
-    const existsProduct = await this.getProduct(id);
-    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
-
     if (updateProductDto.name) {
       const duplicate = await this.productRepository.findOne({
         where: { name: updateProductDto.name },
@@ -89,6 +86,9 @@ export class ProductService {
         throw new ConflictException('Nombre de producto duplicado');
       }
     }
+
+     const existsProduct = await this.getProduct(id);
+     if (!existsProduct) throw new NotFoundException('Producto no encontrado');
 
     let imgUrl = existsProduct.image;
     if (image) {
@@ -112,7 +112,9 @@ export class ProductService {
       ...updateProductDto,
       image: imgUrl,
     });
-    return { msg: `Producto #${id} actualizado` };
+
+    const productName = updateProductDto.name || existsProduct.name
+    return { msg: `Producto ${productName} actualizado` };
   }
 
   async remove(id: string) {

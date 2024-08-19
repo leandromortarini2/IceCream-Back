@@ -37,18 +37,18 @@ export class FlavourService {
   }
 
   async update(id: string, updateFlavourDto: UpdateFlavourDto) {
-    const flavour = await this.getFlavour(id, false);
-    if (!flavour) throw new NotFoundException('Sabor no encontrado');
-
     if (updateFlavourDto.name) {
       const duplicate = await this.flavourRepository.findOne({
         where: { name: updateFlavourDto.name },
       });
       if (duplicate) throw new ConflictException('Nombre de sabor duplicado');
     }
+    const flavour = await this.getFlavour(id, false);
+    if (!flavour) throw new NotFoundException('Sabor no encontrado');
 
     await this.flavourRepository.update(id, { ...updateFlavourDto });
-    return { message: `Sabor ${id} actualizado` };
+    const flavourName= updateFlavourDto.name||flavour.name
+    return { message: `Sabor ${flavourName} actualizado` };
   }
 
   async remove(id: string) {

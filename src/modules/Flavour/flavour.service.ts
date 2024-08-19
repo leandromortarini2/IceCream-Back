@@ -65,4 +65,11 @@ export class FlavourService {
     });
     return existFlavor;
   }
+
+  async getFlavourByName(name: string) {
+    const existFlavor = await this.flavourRepository.findOne({
+      where: { name: name },
+    });
+    return existFlavor;
+  }
 }

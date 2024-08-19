@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
@@ -32,13 +32,13 @@ export class CategoryService {
   }
 
   async findOne(id: string) {
-    const existsCategory = await this.getCategory(id, true);
+    const existsCategory = await this.getCategory(id, false);
     if (!existsCategory) throw new NotFoundException('Categoria no existe!');
     return existsCategory;
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    const existsCategory = await this.getCategory(id, true);
+  async update(id: string, updateCategoryDto: CreateCategoryDto) {
+    const existsCategory = await this.getCategory(id, false);
     if (!existsCategory) throw new NotFoundException('Categoria no existe!');
 
     if (updateCategoryDto.name) {
@@ -64,6 +64,13 @@ export class CategoryService {
     const existsCategory = await this.categoryRepository.findOne({
       where: { id: id },
       relations: { products: relation },
+    });
+    return existsCategory;
+  }
+
+  async getCategoryByName(name: string) {
+    const existsCategory = await this.categoryRepository.findOne({
+      where: { name: name },
     });
     return existsCategory;
   }

@@ -24,14 +24,12 @@ export class ProductService {
     private cloudinaryService: CloudinaryService,
   ) {}
   async create(createProductDto: CreateProductDto, image) {
-    const category = await this.categoryService.getCategory(
-      createProductDto.categoryId,
-      false,
+    const category = await this.categoryService.getCategoryByName(
+      createProductDto.name,
     );
     if (!category) throw new NotFoundException('Categoria no existe!');
-    const flavour = await this.flavourService.getFlavour(
-      createProductDto.flavourId,
-      false,
+    const flavour = await this.flavourService.getFlavourByName(
+      createProductDto.flavourName,
     );
     if (!flavour) throw new NotFoundException('Sabor no existe!');
 
@@ -69,9 +67,9 @@ export class ProductService {
     });
   }
 
-  async findOne(name: string) {
+  async findOne(id: string) {
     const existsProduct = await this.productRepository.findOne({
-      where: { name },
+      where: { id:id },
       relations: { category: true, flavour: true },
     });
     if (!existsProduct) throw new NotFoundException('Producto no encontrado');

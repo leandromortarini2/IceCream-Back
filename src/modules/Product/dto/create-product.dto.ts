@@ -23,7 +23,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   @MaxLength(250)
   @Matches(/^[a-zA-Z0-9 ]*$/, {
-    message: 'El nombre solo puede contener letras, números y espacios',
+    message: 'Descripcion del producto',
   })
   description: string;
 
@@ -39,9 +39,9 @@ export class CreateProductDto {
 
   @IsNotEmpty()
   @IsString()
-  flavourId: string;
+  flavourName: string;
 
   @IsNotEmpty()
   @IsString()
-  categoryId: string;
+  categoryName: string;
 }

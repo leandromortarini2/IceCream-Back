@@ -4,6 +4,6 @@ export class CreateFlavourDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
-  @Matches(/^[A-Za-z0-9 ]+$/, { message: 'Solo letras y números' })
+  @Matches(/^[A-Za-z0-9 ]+$/, { message: 'Solo letras, números y espacios' })
   name: string;
 }

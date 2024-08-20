@@ -38,10 +38,20 @@ export class CreateProductDto {
   stock: number;
 
   @IsNotEmpty()
+  @Transform(({ value }) => value.toString().toLowerCase())
   @IsString()
+  @MaxLength(50)
+  @Matches(/^[A-Za-z0-9 ]+$/, {
+    message: 'Sabor debe contener solo letras, números y espacios',
+  })
   flavourName: string;
 
   @IsNotEmpty()
+  @Transform(({ value }) => value.toString().toLowerCase())
   @IsString()
+  @MaxLength(50)
+  @Matches(/^[A-Za-z0-9 ]+$/, {
+    message: 'Cateogoria debe contener solo letras, números y espacios',
+  })
   categoryName: string;
 }

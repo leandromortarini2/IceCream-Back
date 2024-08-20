@@ -14,16 +14,17 @@ export class FlavourService {
   constructor(
     @InjectRepository(Flavour) private flavourRepository: Repository<Flavour>,
   ) {}
-  async create(createFlavourDto: CreateFlavourDto) {
+  async create(flavourName: string) {
     const existsFlavour = await this.flavourRepository.findOne({
-      where: { name: createFlavourDto.name },
+      where: { name: flavourName },
     });
     if (existsFlavour) throw new ConflictException('Sabor duplicado');
 
-    const newFlavour = await this.flavourRepository.create(createFlavourDto);
-    await this.flavourRepository.save(newFlavour);
-
-    return { message: 'Nuevo Sabor Creado' };
+    const newFlavour = await this.flavourRepository.create({
+      name: flavourName,
+    });
+    const savedFlavour = await this.flavourRepository.save(newFlavour);
+    return savedFlavour;
   }
 
   async findAll() {
@@ -47,7 +48,7 @@ export class FlavourService {
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
 
     await this.flavourRepository.update(id, { ...updateFlavourDto });
-    const flavourName= updateFlavourDto.name||flavour.name
+    const flavourName = updateFlavourDto.name || flavour.name;
     return { message: `Sabor ${flavourName} actualizado` };
   }
 

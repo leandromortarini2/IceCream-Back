@@ -23,15 +23,31 @@ export class ProductService {
     private categoryService: CategoryService,
     private cloudinaryService: CloudinaryService,
   ) {}
-  async create(createProductDto: CreateProductDto, image) {
-    const category = await this.categoryService.getCategoryByName(
-      createProductDto.name,
+  async create(createProductDto: CreateProductDto, image: Express.Multer.File) {
+    let category = await this.categoryService.getCategoryByName(
+      createProductDto.categoryName,
     );
-    if (!category) throw new NotFoundException('Categoria no existe!');
-    const flavour = await this.flavourService.getFlavourByName(
+
+    if (!category) {
+      category = await this.categoryService.create(
+        createProductDto.categoryName,
+      );
+    }
+
+    if (!category) {
+      throw new NotFoundException('No se pudo crear o encontrar la categoría');
+    }
+
+    let flavour = await this.flavourService.getFlavourByName(
       createProductDto.flavourName,
     );
-    if (!flavour) throw new NotFoundException('Sabor no existe!');
+    if (!flavour) {
+      flavour = await this.flavourService.create(createProductDto.flavourName);
+    }
+
+    if (!flavour) {
+      throw new NotFoundException('No se pudo crear o encontrar el sabor');
+    }
 
     const existsNameProduct = await this.productRepository.findOne({
       where: { name: createProductDto.name },
@@ -69,14 +85,18 @@ export class ProductService {
 
   async findOne(id: string) {
     const existsProduct = await this.productRepository.findOne({
-      where: { id:id },
+      where: { id: id },
       relations: { category: true, flavour: true },
     });
     if (!existsProduct) throw new NotFoundException('Producto no encontrado');
     return existsProduct;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto, image) {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    image: Express.Multer.File,
+  ) {
     if (updateProductDto.name) {
       const duplicate = await this.productRepository.findOne({
         where: { name: updateProductDto.name },
@@ -87,8 +107,8 @@ export class ProductService {
       }
     }
 
-     const existsProduct = await this.getProduct(id);
-     if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
 
     let imgUrl = existsProduct.image;
     if (image) {
@@ -113,7 +133,7 @@ export class ProductService {
       image: imgUrl,
     });
 
-    const productName = updateProductDto.name || existsProduct.name
+    const productName = updateProductDto.name || existsProduct.name;
     return { msg: `Producto ${productName} actualizado` };
   }
 
@@ -126,7 +146,7 @@ export class ProductService {
     await this.cloudinaryService.deleteImage(publicId);
 
     await this.productRepository.remove(existsProduct);
-    return { message: `Producto #${id} eliminado` };
+    return { message: `Producto ${existsProduct.name} eliminado` };
   }
 
   async getProduct(id: string) {

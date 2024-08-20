@@ -15,16 +15,17 @@ export class CategoryService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(categoryName: string) {
     const existsCategory = await this.categoryRepository.findOne({
-      where: { name: createCategoryDto.name },
+      where: { name: categoryName },
     });
     if (existsCategory) throw new ConflictException('Categoria Existente!');
 
-    const newCategory = await this.categoryRepository.create(createCategoryDto);
-    await this.categoryRepository.save(newCategory);
-
-    return { message: 'Categoria Creada' };
+    const newCategory = await this.categoryRepository.create({
+      name: categoryName,
+    });
+    const savedCategory = await this.categoryRepository.save(newCategory);
+    return savedCategory;
   }
 
   async findAll() {
@@ -59,7 +60,7 @@ export class CategoryService {
     const existsCategory = await this.getCategory(id, true);
     if (!existsCategory) throw new NotFoundException('Categoria no existe!');
     await this.categoryRepository.remove(existsCategory);
-    return { message: `Categoria #${id} Eliminada` };
+    return { message: `Categoria ${existsCategory.name} Eliminada` };
   }
 
   async getCategory(id: string, relation: boolean) {

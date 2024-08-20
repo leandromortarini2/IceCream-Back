@@ -29,7 +29,7 @@ export class Product {
   @Column({ type: 'varchar', nullable: true })
   image: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', default: false })
   state: boolean;
 
   @ManyToOne(() => Flavour, (flavour) => flavour.products)

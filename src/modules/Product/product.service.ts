@@ -97,7 +97,10 @@ export class ProductService {
     updateProductDto: UpdateProductDto,
     image: Express.Multer.File,
   ) {
-    if (updateProductDto.name) {
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+
+    if (updateProductDto.name && updateProductDto.name !== existsProduct.name) {
       const duplicate = await this.productRepository.findOne({
         where: { name: updateProductDto.name },
       });
@@ -107,13 +110,10 @@ export class ProductService {
       }
     }
 
-    const existsProduct = await this.getProduct(id);
-    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
-
     let imgUrl = existsProduct.image;
     if (image) {
       //*Extrar id img para eliminarla en cloudinary
-      if (existsProduct.image !== null) {
+      if (existsProduct.image) {
         const publicId = extractPublicIdFromUrl(existsProduct.image);
         await this.cloudinaryService.deleteImage(publicId);
       }

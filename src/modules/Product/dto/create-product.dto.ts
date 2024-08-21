@@ -1,5 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -36,6 +37,11 @@ export class CreateProductDto {
   @IsInt()
   @IsPositive()
   stock: number;
+
+  @Type(() => Boolean)
+  @IsOptional()
+  @IsBoolean()
+  state: boolean;
 
   @IsNotEmpty()
   @Transform(({ value }) => value.toString().toLowerCase())

@@ -26,7 +26,11 @@ export class Product {
   @Column({ type: 'int' })
   stock: number;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({
+    type: 'varchar',
+    default:
+    `${process.env.IMAGE_DEFAULT}`
+  })
   image: string;
 
   @Column({ type: 'boolean', default: false })

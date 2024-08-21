@@ -55,7 +55,7 @@ export class ProductService {
     if (existsNameProduct)
       throw new ConflictException('Nombre de producto duplicado');
 
-    let imgUrl = null;
+    let imgUrl: string;
     if (image) {
       const imgUpload = await this.cloudinaryService.uploadImg(image);
       if (!imgUpload) {

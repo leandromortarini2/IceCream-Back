@@ -1,26 +1,159 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from './entities/product.entity';
+import { Repository } from 'typeorm';
+import { FlavourService } from '../Flavour/flavour.service';
+import { CategoryService } from '../category/category.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { extractPublicIdFromUrl } from 'src/utils/extractPublicId.utils';
 
 @Injectable()
 export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    @InjectRepository(Product) private productRepository: Repository<Product>,
+    private flavourService: FlavourService,
+    private categoryService: CategoryService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
+  async create(createProductDto: CreateProductDto, image: Express.Multer.File) {
+    let category = await this.categoryService.getCategoryByName(
+      createProductDto.categoryName,
+    );
+
+    if (!category) {
+      category = await this.categoryService.create(
+        createProductDto.categoryName,
+      );
+    }
+
+    if (!category) {
+      throw new NotFoundException('No se pudo crear o encontrar la categoría');
+    }
+
+    let flavour = await this.flavourService.getFlavourByName(
+      createProductDto.flavourName,
+    );
+    if (!flavour) {
+      flavour = await this.flavourService.create(createProductDto.flavourName);
+    }
+
+    if (!flavour) {
+      throw new NotFoundException('No se pudo crear o encontrar el sabor');
+    }
+
+    const existsNameProduct = await this.productRepository.findOne({
+      where: { name: createProductDto.name },
+    });
+    if (existsNameProduct)
+      throw new ConflictException('Nombre de producto duplicado');
+
+    let imgUrl = null;
+    if (image) {
+      const imgUpload = await this.cloudinaryService.uploadImg(image);
+      if (!imgUpload) {
+        throw new HttpException(
+          'Error al subir la imagen',
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
+      imgUrl = imgUpload.url;
+    }
+
+    const newProduct = await this.productRepository.create({
+      ...createProductDto,
+      image: imgUrl,
+      flavour,
+      category,
+    });
+    await this.productRepository.save(newProduct);
+    return { message: 'Producto Creado!' };
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll() {
+    return await this.productRepository.find({
+      relations: { category: true, flavour: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    const existsProduct = await this.productRepository.findOne({
+      where: { id: id },
+      relations: { category: true, flavour: true },
+    });
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+    return existsProduct;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    image: Express.Multer.File,
+  ) {
+    if (updateProductDto.name) {
+      const duplicate = await this.productRepository.findOne({
+        where: { name: updateProductDto.name },
+      });
+
+      if (duplicate) {
+        throw new ConflictException('Nombre de producto duplicado');
+      }
+    }
+
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+
+    let imgUrl = existsProduct.image;
+    if (image) {
+      //*Extrar id img para eliminarla en cloudinary
+      if (existsProduct.image !== null) {
+        const publicId = extractPublicIdFromUrl(existsProduct.image);
+        await this.cloudinaryService.deleteImage(publicId);
+      }
+
+      const imgUpload = await this.cloudinaryService.uploadImg(image);
+      if (!imgUpload) {
+        throw new HttpException(
+          'Error al subir la imagen',
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
+      imgUrl = imgUpload.url;
+    }
+
+    await this.productRepository.update(id, {
+      ...updateProductDto,
+      image: imgUrl,
+    });
+
+    const productName = updateProductDto.name || existsProduct.name;
+    return { msg: `Producto ${productName} actualizado` };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+
+    //*Extrar id img para eliminarla en cloudinary
+    const publicId = extractPublicIdFromUrl(existsProduct.image);
+    await this.cloudinaryService.deleteImage(publicId);
+
+    await this.productRepository.remove(existsProduct);
+    return { message: `Producto ${existsProduct.name} eliminado` };
+  }
+
+  async getProduct(id: string) {
+    const product = await this.productRepository.findOne({
+      where: { id: id },
+      relations: { category: true, flavour: true },
+    });
+    return product;
   }
 }

@@ -1,8 +1,5 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../Users/user.service';
 import { loginUserDto } from './dto/loginUser.dto';

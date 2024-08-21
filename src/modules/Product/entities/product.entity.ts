@@ -14,7 +14,7 @@ export class Product {
   @PrimaryColumn({ type: 'varchar', length: 26 })
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true })
   name: string;
 
   @Column({ type: 'varchar' })
@@ -29,7 +29,7 @@ export class Product {
   @Column({ type: 'varchar', nullable: true })
   image: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: false })
   state: boolean;
 
   @ManyToOne(() => Flavour, (flavour) => flavour.products)

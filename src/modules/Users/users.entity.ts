@@ -20,19 +20,22 @@ export class User {
   @PrimaryColumn({ type: 'varchar', length: 26 })
   id: string;
 
-  @Column({ type: 'varchar', length: 80, nullable: false, unique: true })
+  @Column({ type: 'varchar', length: 80, nullable: true, unique: true })
   username: string;
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
 
+  @Column({ type: 'varchar', length: 100, nullable: false })
+  lastName: string;
+
   @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: false })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   password: string;
 
-  @Column({ type: 'varchar', length: 10, nullable: false })
+  @Column({ type: 'varchar', length: 10, nullable: true })
   phone: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
@@ -52,7 +55,6 @@ export class User {
 
   @BeforeInsert()
   generateId() {
-    console.log('BeforeInsert hook called');
     this.id = ulid();
   }
 }

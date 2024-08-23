@@ -23,13 +23,10 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: 'int' })
-  stock: number;
-
   @Column({
     type: 'varchar',
-    default:
-    `${process.env.IMAGE_DEFAULT}`
+    default: `${process.env.IMAGE_DEFAULT}`,
+    nullable: true,
   })
   image: string;
 

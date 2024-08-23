@@ -2,19 +2,35 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
-
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
+import * as data from '../../../data/category.data.json';
 
 @Injectable()
-export class CategoryService {
+export class CategoryService implements OnModuleInit {
   constructor(
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
+
+  async onModuleInit() {
+    const categoryFromJson = new Set<string>();
+    data.forEach((category) => categoryFromJson.add(category.name));
+    const categories = Array.from(categoryFromJson);
+
+    for (const categoryName of categories) {
+      const existCategory = await this.getCategoryByName(categoryName);
+      if (!existCategory) {
+        await this.create(categoryName);
+      }
+    }
+    return 'PreLoad-Categories';
+  }
+
   async create(categoryName: string) {
     const existsCategory = await this.categoryRepository.findOne({
       where: { name: categoryName },

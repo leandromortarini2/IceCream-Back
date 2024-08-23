@@ -45,4 +45,26 @@ export class CloudinaryService {
       throw new Error(`Error al eliminar imagen: ${error.message}`);
     }
   }
+
+  async buscarImagen(
+    publicId: string,
+  ): Promise<UploadApiResponse | UploadApiErrorResponse> {
+    try {
+      return new Promise((resolve, reject) => {
+        v2.api.resource(
+          publicId,
+          { resource_type: 'image' },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          },
+        );
+      });
+    } catch (error) {
+      throw new Error(`Error al buscar la imagen: ${error.message}`);
+    }
+  }
 }

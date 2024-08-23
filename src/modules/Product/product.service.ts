@@ -133,7 +133,8 @@ export class ProductService {
     let imgUrl = existsProduct.image;
     if (image) {
       //*Extrar id img para eliminarla en cloudinary
-      if (existsProduct.image) {
+      const defaultImageUrl = process.env.IMAGE_DEFAULT;
+      if (existsProduct.image !== defaultImageUrl) {
         const publicId = extractPublicIdFromUrl(existsProduct.image);
         await this.cloudinaryService.deleteImage(publicId);
       }

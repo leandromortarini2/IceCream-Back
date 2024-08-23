@@ -26,7 +26,6 @@ export class Product {
   @Column({
     type: 'varchar',
     default: `${process.env.IMAGE_DEFAULT}`,
-    nullable: true,
   })
   image: string;
 

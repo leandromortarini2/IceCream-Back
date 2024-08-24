@@ -14,6 +14,8 @@ import { FlavourService } from '../Flavour/flavour.service';
 import { CategoryService } from '../category/category.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { extractPublicIdFromUrl } from 'src/utils/extractPublicId.utils';
+import { Category } from '../category/entities/category.entity';
+import { Flavour } from '../Flavour/entities/flavour.entity';
 
 @Injectable()
 export class ProductService {
@@ -97,7 +99,28 @@ export class ProductService {
     updateProductDto: UpdateProductDto,
     image: Express.Multer.File,
   ) {
-    if (updateProductDto.name) {
+    const existsProduct = await this.getProduct(id);
+    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
+
+    let category: Category;
+    if (updateProductDto.categoryName) {
+      const existCategory = await this.categoryService.getCategoryByName(
+        updateProductDto.categoryName,
+      );
+      if (!existCategory) throw new NotFoundException('Categoria no existe');
+      category = existCategory;
+    }
+
+    let flavour: Flavour;
+    if (updateProductDto.flavourName) {
+      const existFlavour = await this.flavourService.getFlavourByName(
+        updateProductDto.flavourName,
+      );
+      if (!existFlavour) throw new NotFoundException('Sabor no existe');
+      flavour = existFlavour;
+    }
+
+    if (updateProductDto.name && updateProductDto.name !== existsProduct.name) {
       const duplicate = await this.productRepository.findOne({
         where: { name: updateProductDto.name },
       });
@@ -107,13 +130,11 @@ export class ProductService {
       }
     }
 
-    const existsProduct = await this.getProduct(id);
-    if (!existsProduct) throw new NotFoundException('Producto no encontrado');
-
     let imgUrl = existsProduct.image;
     if (image) {
       //*Extrar id img para eliminarla en cloudinary
-      if (existsProduct.image !== null) {
+      const defaultImageUrl = process.env.IMAGE_DEFAULT;
+      if (existsProduct.image !== defaultImageUrl) {
         const publicId = extractPublicIdFromUrl(existsProduct.image);
         await this.cloudinaryService.deleteImage(publicId);
       }
@@ -128,10 +149,23 @@ export class ProductService {
       imgUrl = imgUpload.url;
     }
 
-    await this.productRepository.update(id, {
-      ...updateProductDto,
+    const updateData: Partial<Product> = {
+      name: updateProductDto.name || existsProduct.name,
+      description: updateProductDto.description || existsProduct.description,
+      price:
+        updateProductDto.price !== undefined
+          ? updateProductDto.price
+          : existsProduct.price,
+      state:
+        updateProductDto.state !== undefined
+          ? updateProductDto.state
+          : existsProduct.state,
+      category,
+      flavour,
       image: imgUrl,
-    });
+    };
+
+    await this.productRepository.update(id, updateData);
 
     const productName = updateProductDto.name || existsProduct.name;
     return { msg: `Producto ${productName} actualizado` };

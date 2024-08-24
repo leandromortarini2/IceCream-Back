@@ -12,19 +12,22 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
+  @Transform(({ value }) => value.toString().toLowerCase())
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  @Matches(/^[a-zA-Z0-9 ]*$/, {
-    message: 'El nombre solo puede contener letras, números',
+  @Matches(/^[A-Za-z0-9 ,]*$/, {
+    message:
+      'El nombre solo puede contener solo letras, números, comas y espacios',
   })
   name: string;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(250)
-  @Matches(/^[a-zA-Z0-9 ]*$/, {
-    message: 'Descripcion del producto',
+  @Matches(/^[A-Za-z0-9 ,]+$/, {
+    message:
+      'Descripcion del producto debe contener solo letras, números, comas y espacios',
   })
   description: string;
 
@@ -32,11 +35,6 @@ export class CreateProductDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
   price: number;
-
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  stock: number;
 
   @Type(() => Boolean)
   @IsOptional()
@@ -47,8 +45,8 @@ export class CreateProductDto {
   @Transform(({ value }) => value.toString().toLowerCase())
   @IsString()
   @MaxLength(50)
-  @Matches(/^[A-Za-z0-9 ]+$/, {
-    message: 'Sabor debe contener solo letras, números y espacios',
+  @Matches(/^[A-Za-z0-9 ,]+$/, {
+    message: 'Sabor debe contener solo letras, números, comas y espacios',
   })
   flavourName: string;
 
@@ -56,8 +54,8 @@ export class CreateProductDto {
   @Transform(({ value }) => value.toString().toLowerCase())
   @IsString()
   @MaxLength(50)
-  @Matches(/^[A-Za-z0-9 ]+$/, {
-    message: 'Cateogoria debe contener solo letras, números y espacios',
+  @Matches(/^[A-Za-z0-9 ,]+$/, {
+    message: 'Categoria debe contener solo letras, números, comas y espacios',
   })
   categoryName: string;
 }

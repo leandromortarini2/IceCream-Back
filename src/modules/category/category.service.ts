@@ -6,8 +6,7 @@ import {
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
-import { In, Repository } from 'typeorm';
-import * as data from '../../../data/category.data.json';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class CategoryService {
@@ -15,41 +14,6 @@ export class CategoryService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
-
-  async seedCategories() {
-    const categoryFromJson = new Set<string>();
-    data.forEach((category) =>
-      categoryFromJson.add(category.name.toLowerCase()),
-    );
-    const categories = Array.from(categoryFromJson);
-
-    const existingCategories = await this.getCategoriesByNames(categories);
-
-    const categoriesToCreate = categories.filter(
-      (categoryName) => !existingCategories.includes(categoryName),
-    );
-
-    if (categoriesToCreate.length > 0) {
-      await this.createCategoriesInBatch(categoriesToCreate);
-    }
-  }
-
-  async getCategoriesByNames(names: string[]): Promise<string[]> {
-    const categories = await this.categoryRepository.find({
-      where: {
-        name: In(names),
-      },
-    });
-
-    return categories.map((category) => category.name);
-  }
-
-  async createCategoriesInBatch(categories: string[]): Promise<void> {
-    const categoryEntities = categories.map((name) => ({ name }));
-    const categoriesNames =
-      await this.categoryRepository.create(categoryEntities);
-    await this.categoryRepository.save(categoriesNames);
-  }
 
   async create(categoryName: string) {
     const existsCategory = await this.categoryRepository.findOne({

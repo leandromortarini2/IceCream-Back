@@ -6,46 +6,13 @@ import {
 import { UpdateFlavourDto } from './dto/update-flavour.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Flavour } from './entities/flavour.entity';
-import { In, Repository } from 'typeorm';
-import * as data from '../../../data/flavour.data.json';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FlavourService {
   constructor(
     @InjectRepository(Flavour) private flavourRepository: Repository<Flavour>,
   ) {}
-
-  async seedFlavours() {
-    const flavourFromJson = new Set<string>();
-    data.forEach((producto) =>
-      flavourFromJson.add(producto.name.toLowerCase()),
-    );
-    const flavours = Array.from(flavourFromJson);
-    const existingFlavours = await this.getFlavoursByNames(flavours);
-    const flavoursToCreate = flavours.filter(
-      (flavourName) => !existingFlavours.includes(flavourName),
-    );
-
-    if (flavoursToCreate.length > 0) {
-      await this.createFlavoursInBatch(flavoursToCreate);
-    }
-  }
-
-  async getFlavoursByNames(names: string[]): Promise<string[]> {
-    const flavours = await this.flavourRepository.find({
-      where: {
-        name: In(names),
-      },
-    });
-    return flavours.map((flavour) => flavour.name);
-  }
-
-  async createFlavoursInBatch(flavours: string[]): Promise<void> {
-    const flavourEntities = flavours.map((name) => ({ name }));
-
-    const flavoursNames = await this.flavourRepository.create(flavourEntities);
-    await this.flavourRepository.save(flavoursNames);
-  }
 
   async create(flavourName: string) {
     const existsFlavour = await this.flavourRepository.findOne({

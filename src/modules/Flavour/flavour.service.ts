@@ -2,7 +2,6 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  OnModuleInit,
 } from '@nestjs/common';
 import { UpdateFlavourDto } from './dto/update-flavour.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,20 +10,18 @@ import { In, Repository } from 'typeorm';
 import * as data from '../../../data/flavour.data.json';
 
 @Injectable()
-export class FlavourService implements OnModuleInit {
+export class FlavourService {
   constructor(
     @InjectRepository(Flavour) private flavourRepository: Repository<Flavour>,
   ) {}
 
-  async onModuleInit() {
+  async seedFlavours() {
     const flavourFromJson = new Set<string>();
     data.forEach((producto) =>
       flavourFromJson.add(producto.name.toLowerCase()),
     );
     const flavours = Array.from(flavourFromJson);
-
     const existingFlavours = await this.getFlavoursByNames(flavours);
-
     const flavoursToCreate = flavours.filter(
       (flavourName) => !existingFlavours.includes(flavourName),
     );
@@ -32,8 +29,6 @@ export class FlavourService implements OnModuleInit {
     if (flavoursToCreate.length > 0) {
       await this.createFlavoursInBatch(flavoursToCreate);
     }
-
-    return 'PreLoad-Flavours';
   }
 
   async getFlavoursByNames(names: string[]): Promise<string[]> {

@@ -2,7 +2,6 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  OnModuleInit,
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,13 +10,13 @@ import { In, Repository } from 'typeorm';
 import * as data from '../../../data/category.data.json';
 
 @Injectable()
-export class CategoryService implements OnModuleInit {
+export class CategoryService {
   constructor(
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async onModuleInit() {
+  async seedCategories() {
     const categoryFromJson = new Set<string>();
     data.forEach((category) =>
       categoryFromJson.add(category.name.toLowerCase()),
@@ -33,8 +32,6 @@ export class CategoryService implements OnModuleInit {
     if (categoriesToCreate.length > 0) {
       await this.createCategoriesInBatch(categoriesToCreate);
     }
-
-    return 'PreLoad-Categories';
   }
 
   async getCategoriesByNames(names: string[]): Promise<string[]> {

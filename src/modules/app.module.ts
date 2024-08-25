@@ -6,12 +6,20 @@ import { AppController } from './app.controller';
 import { UserModule } from './Users/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './Auth/auth.module';
+import { ProductModule } from './Product/product.module';
+import { FlavourModule } from './Flavour/flavour.module';
+import { CategoryModule } from './category/category.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { SeedModule } from './Seed/seed.module';
+import { ToppingModule } from './topping/topping.module';
+import { SalsasModule } from './salsas/salsas.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [typeOrmConfig],
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -25,6 +33,13 @@ import { AuthModule } from './Auth/auth.module';
     }),
     UserModule,
     AuthModule,
+    ProductModule,
+    FlavourModule,
+    CategoryModule,
+    SeedModule,
+    CloudinaryModule,
+    ToppingModule,
+    SalsasModule,
   ],
   controllers: [AppController],
   providers: [],

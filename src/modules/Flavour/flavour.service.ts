@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -76,6 +77,9 @@ export class FlavourService {
   }
 
   async getFlavourByName(name: string) {
+
+    if (!name) return null;
+
     const existFlavor = await this.flavourRepository.findOne({
       where: { name: name },
     });

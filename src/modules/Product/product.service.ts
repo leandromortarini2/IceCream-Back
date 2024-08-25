@@ -43,11 +43,12 @@ export class ProductService {
     let flavour = await this.flavourService.getFlavourByName(
       createProductDto.flavourName,
     );
-    if (!flavour) {
+    
+    if (!flavour && flavour !== null) {
       flavour = await this.flavourService.create(createProductDto.flavourName);
     }
 
-    if (!flavour) {
+    if (!flavour && flavour !== null) {
       throw new NotFoundException('No se pudo crear o encontrar el sabor');
     }
 

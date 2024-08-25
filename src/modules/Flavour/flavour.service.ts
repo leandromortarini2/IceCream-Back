@@ -14,14 +14,19 @@ export class FlavourService {
     @InjectRepository(Flavour) private flavourRepository: Repository<Flavour>,
   ) {}
 
-  async create(flavourName: string) {
+  async create(input: string | UpdateFlavourDto) {
+
+    const flavourName = typeof input === 'string' ? input : input.name;
+    const state = typeof input === 'string' ? undefined : input.state;
+
     const existsFlavour = await this.flavourRepository.findOne({
       where: { name: flavourName },
     });
     if (existsFlavour) throw new ConflictException('Sabor duplicado');
 
-    const newFlavour = await this.flavourRepository.create({
+    const newFlavour = this.flavourRepository.create({
       name: flavourName,
+      state: state
     });
     const savedFlavour = await this.flavourRepository.save(newFlavour);
     return savedFlavour;
@@ -38,14 +43,17 @@ export class FlavourService {
   }
 
   async update(id: string, updateFlavourDto: UpdateFlavourDto) {
-    if (updateFlavourDto.name) {
+
+    const flavour = await this.getFlavour(id, false);
+    if (!flavour) throw new NotFoundException('Sabor no encontrado');
+
+
+    if (updateFlavourDto.name && updateFlavourDto.name !== flavour.name) {
       const duplicate = await this.flavourRepository.findOne({
         where: { name: updateFlavourDto.name },
       });
       if (duplicate) throw new ConflictException('Nombre de sabor duplicado');
     }
-    const flavour = await this.getFlavour(id, false);
-    if (!flavour) throw new NotFoundException('Sabor no encontrado');
 
     await this.flavourRepository.update(id, { ...updateFlavourDto });
     const flavourName = updateFlavourDto.name || flavour.name;
@@ -56,7 +64,7 @@ export class FlavourService {
     const flavour = await this.getFlavour(id, false);
     if (!flavour) throw new NotFoundException('Sabor no encontrado');
     await this.flavourRepository.remove(flavour);
-    return { message: `Sabor #${id} Borrado` };
+    return { message: `Sabor ${flavour.name} eliminado con éxito` };
   }
 
   async getFlavour(id: string, relation: boolean) {

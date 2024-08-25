@@ -1,11 +1,15 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Category } from '../category/entities/category.entity';
-import { In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Flavour } from '../Flavour/entities/flavour.entity';
 import * as seedFlavours from '../../../data/flavour.data.json';
 import * as seedCategories from '../../../data/category.data.json';
 import { SeedData } from 'interfaces/data.interfaces';
+import { Role, User } from '../Users/entity/users.entity';
+import { Topping } from '../topping/entities/topping.entity';
+import { salsas, toppings } from '../../../data/dataProducts.data';
+import { Salsa } from '../salsas/entities/salsa.entity';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -14,19 +18,46 @@ export class SeedService implements OnModuleInit {
     private categoryRepository: Repository<Category>,
     @InjectRepository(Flavour)
     private flavourRepository: Repository<Flavour>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(Topping)
+    private toppingRepository: Repository<Topping>,
+    @InjectRepository(Salsa)
+    private salsaRepository: Repository<Salsa>,
   ) {}
   async onModuleInit() {
     try {
       await this.seedFlavours();
-      console.log('Sabores precargados exitosamente.');
-    } catch (error) {
-      console.error('Error al precargar sabores:', error);
-    }
-    try {
+      Logger.log(
+        'Sabores precargados exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
       await this.seedCategories();
-      console.log('Sabores precargados exitosamente.');
+      Logger.log(
+        'Categorias precargadas exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
+      await this.createAdminUser();
+      Logger.log(
+        'Usuario Admin cargado exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
+      await this.preloadArrStringProducts( toppings, this.toppingRepository);
+      Logger.log(
+        'Toppings cargados exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
+      await this.preloadArrStringProducts( salsas, this.salsaRepository);
+      Logger.log(
+        'Salsas cargadas exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
     } catch (error) {
-      console.error('Error al precargar sabores:', error);
+      console.error('Error en la precarga de datos:', error);
     }
   }
 
@@ -80,8 +111,57 @@ export class SeedService implements OnModuleInit {
     names: string[],
     nameField: string,
   ): Promise<void> {
-    const entityObjects = names.map((name) => ({ [nameField]: name }));
+    const entityObjects = names.map((name) => {
+
+      if (repository.target === Flavour) {
+        return { [nameField]: name, state: true };
+      }
+
+      return { [nameField]: name };
+    });
+
     const entities = repository.create(entityObjects);
     await repository.save(entities);
   }
+
+  private async createAdminUser () {
+    const userAdmin = await this.userRepository.findOneBy({
+      email: process.env.EMAIL_ADMIN,
+    });
+
+    if (!userAdmin) {
+      const createUserAdmin = this.userRepository.create({
+        name: process.env.NAME_ADMIN,
+        lastName: process.env.LAST_NAME_ADMIN,
+        email: process.env.EMAIL_ADMIN,
+        validate: true,
+        role: Role.ADMIN,
+        lastLogin: new Date(),
+      });
+      await this.userRepository.save(createUserAdmin);
+    }    
+  };
+
+  private async preloadArrStringProducts<T>(products: Array<string>, repository: Repository<T>,) {
+
+    try {
+
+      for await (const product of products) {      
+        const existProduct = await repository.findOneBy({
+          name: product.toLocaleLowerCase(),
+        } as unknown as FindOptionsWhere<T>);
+
+        if (existProduct) continue; 
+        
+        const newProduct = repository.create({
+          name: product.toLocaleLowerCase(),
+          state: true,
+        } as T);
+        await repository.save(newProduct);
+      }
+
+    } catch (error) {
+      throw error;
+    }
+  };
 }

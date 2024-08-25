@@ -10,6 +10,7 @@ import { ProductModule } from './Product/product.module';
 import { FlavourModule } from './Flavour/flavour.module';
 import { CategoryModule } from './category/category.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { SeedModule } from './Seed/seed.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     ProductModule,
     FlavourModule,
     CategoryModule,
+    SeedModule,
     CloudinaryModule,
   ],
   controllers: [AppController],

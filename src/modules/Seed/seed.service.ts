@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Category } from '../category/entities/category.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,15 +18,18 @@ export class SeedService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.seedFlavours();
-      console.log('Sabores precargados exitosamente.');
-    } catch (error) {
-      console.error('Error al precargar sabores:', error);
-    }
-    try {
+      Logger.log(
+        'Sabores precargados exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
       await this.seedCategories();
-      console.log('Sabores precargados exitosamente.');
+      Logger.log(
+        'Categorias precargadas exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
     } catch (error) {
-      console.error('Error al precargar sabores:', error);
+      console.error('Error en la precarga de datos:', error);
     }
   }
 
@@ -80,7 +83,15 @@ export class SeedService implements OnModuleInit {
     names: string[],
     nameField: string,
   ): Promise<void> {
-    const entityObjects = names.map((name) => ({ [nameField]: name }));
+    const entityObjects = names.map((name) => {
+
+      if (repository.target === Flavour) {
+        return { [nameField]: name, state: true };
+      }
+
+      return { [nameField]: name };
+    });
+
     const entities = repository.create(entityObjects);
     await repository.save(entities);
   }

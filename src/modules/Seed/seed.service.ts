@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Category } from '../category/entities/category.entity';
-import { In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Flavour } from '../Flavour/entities/flavour.entity';
 import * as seedFlavours from '../../../data/flavour.data.json';
@@ -8,7 +8,8 @@ import * as seedCategories from '../../../data/category.data.json';
 import { SeedData } from 'interfaces/data.interfaces';
 import { Role, User } from '../Users/entity/users.entity';
 import { Topping } from '../topping/entities/topping.entity';
-import { toppings } from '../../../data/toppings';
+import { salsas, toppings } from '../../../data/dataProducts.data';
+import { Salsa } from '../salsas/entities/salsa.entity';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -21,6 +22,8 @@ export class SeedService implements OnModuleInit {
     private userRepository: Repository<User>,
     @InjectRepository(Topping)
     private toppingRepository: Repository<Topping>,
+    @InjectRepository(Salsa)
+    private salsaRepository: Repository<Salsa>,
   ) {}
   async onModuleInit() {
     try {
@@ -41,9 +44,15 @@ export class SeedService implements OnModuleInit {
         'PreloadData - Heladeria "Ice Cream"',
       );
 
-      await this.preloadToppings();
+      await this.preloadArrStringProducts( toppings, this.toppingRepository);
       Logger.log(
         'Toppings cargados exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
+      await this.preloadArrStringProducts( salsas, this.salsaRepository);
+      Logger.log(
+        'Salsas cargadas exitosamente.',
         'PreloadData - Heladeria "Ice Cream"',
       );
 
@@ -130,24 +139,25 @@ export class SeedService implements OnModuleInit {
         lastLogin: new Date(),
       });
       await this.userRepository.save(createUserAdmin);
-    }
-    
+    }    
   };
 
-  private async preloadToppings () {
+  private async preloadArrStringProducts<T>(products: Array<string>, repository: Repository<T>,) {
 
     try {
 
-      for await (const topping of toppings) {      
-        const existTopping = await this.toppingRepository.findOneBy({
-          name: topping.toLocaleLowerCase(),
-        });            
-        if (existTopping) continue;
+      for await (const product of products) {      
+        const existProduct = await repository.findOneBy({
+          name: product.toLocaleLowerCase(),
+        } as unknown as FindOptionsWhere<T>);
+
+        if (existProduct) continue; 
         
-        const newTopping = this.toppingRepository.create({
-          name: topping.toLocaleLowerCase(),
-        });
-        await this.toppingRepository.save(newTopping);
+        const newProduct = repository.create({
+          name: product.toLocaleLowerCase(),
+          state: true,
+        } as T);
+        await repository.save(newProduct);
       }
 
     } catch (error) {

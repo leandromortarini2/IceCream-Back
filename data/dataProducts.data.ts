@@ -15,3 +15,10 @@ export const toppings = [
     'Crocante de Maní'
 ];
 
+export const salsas = [
+    'Frutilla',
+    'Chocolate',
+    'Dulce de leche',
+    'Caramelo',
+    'Frutos del bosque'
+];

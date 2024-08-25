@@ -40,13 +40,15 @@ export class ToppingService {
   }
 
   async update(id: string, updateToppingDto: UpdateToppingDto) {
-    if (updateToppingDto.name) {
+
+    const existTopping = await this.findOne(id);
+
+    if (updateToppingDto.name && updateToppingDto.name !== existTopping.name) {
       const duplicate = await this.toppingRepository.findOne({
         where: { name: updateToppingDto.name },
       });
       if (duplicate) throw new ConflictException('Ya existe un Topping con ese nombre');
     }
-    await this.findOne(id);
 
     await this.toppingRepository.update(id, { ...updateToppingDto });
     const toppingName = updateToppingDto.name;

@@ -41,7 +41,7 @@ export class CreateProductDto {
   @IsBoolean()
   state: boolean;
 
-  @IsNotEmpty()
+  @IsOptional()
   @Transform(({ value }) => value.toString().toLowerCase())
   @IsString()
   @MaxLength(50)

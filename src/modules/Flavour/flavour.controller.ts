@@ -15,10 +15,10 @@ import { UpdateFlavourDto } from './dto/update-flavour.dto';
 export class FlavourController {
   constructor(private readonly flavourService: FlavourService) {}
 
-  // @Post()
-  // create(@Body() createFlavourDto: CreateFlavourDto) {
-  //   return this.flavourService.create(createFlavourDto);
-  // }
+  @Post()
+  create(@Body() createFlavourDto: CreateFlavourDto) {
+    return this.flavourService.create(createFlavourDto);
+  }
 
   @Get()
   findAll() {

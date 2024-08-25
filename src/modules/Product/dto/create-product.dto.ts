@@ -25,7 +25,7 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(250)
-  @Matches(/^[A-Za-z0-9 ,]+$/, {
+  @Matches(/^[A-Za-z0-9 áéíóúÁÉÍÓÚ,\.]+$/, {
     message:
       'Descripcion del producto debe contener solo letras, números, comas y espacios',
   })

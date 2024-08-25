@@ -15,8 +15,8 @@ export class CreateProductDto {
   @Transform(({ value }) => value.toString().toLowerCase())
   @IsString()
   @IsNotEmpty()
-  @MaxLength(50)
-  @Matches(/^[A-Za-z0-9 ,\.¡!]*$/, {
+  @MaxLength(80)
+  @Matches(/^[A-Za-z0-9 ,\.¡!-]*$/, {
     message:
       'El nombre solo puede contener solo letras, números, comas y espacios',
   })
@@ -25,7 +25,7 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(250)
-  @Matches(/^[A-Za-z0-9 áéíóúÁÉÍÓÚ,\.()¿?¡!]+$/, {
+  @Matches(/^[A-Za-z0-9 áéíóúÁÉÍÓÚ,\.()¿?¡!-]+$/, {
     message:
       'Descripcion del producto debe contener solo letras, números, comas y espacios',
   })

@@ -6,6 +6,7 @@ import { Flavour } from '../Flavour/entities/flavour.entity';
 import * as seedFlavours from '../../../data/flavour.data.json';
 import * as seedCategories from '../../../data/category.data.json';
 import { SeedData } from 'interfaces/data.interfaces';
+import { Role, User } from '../Users/entity/users.entity';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -14,6 +15,8 @@ export class SeedService implements OnModuleInit {
     private categoryRepository: Repository<Category>,
     @InjectRepository(Flavour)
     private flavourRepository: Repository<Flavour>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
   async onModuleInit() {
     try {
@@ -25,6 +28,12 @@ export class SeedService implements OnModuleInit {
       await this.seedCategories();
       Logger.log(
         'Categorias precargadas exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
+      await this.createAdminUser();
+      Logger.log(
+        'Usuario Admin cargado exitosamente.',
         'PreloadData - Heladeria "Ice Cream"',
       );
 
@@ -95,4 +104,23 @@ export class SeedService implements OnModuleInit {
     const entities = repository.create(entityObjects);
     await repository.save(entities);
   }
+
+  private async createAdminUser () {
+    const userAdmin = await this.userRepository.findOneBy({
+      email: process.env.EMAIL_ADMIN,
+    });
+
+    if (!userAdmin) {
+      const createUserAdmin = this.userRepository.create({
+        name: process.env.NAME_ADMIN,
+        lastName: process.env.LAST_NAME_ADMIN,
+        email: process.env.EMAIL_ADMIN,
+        validate: true,
+        role: Role.ADMIN,
+        lastLogin: new Date(),
+      });
+      await this.userRepository.save(createUserAdmin);
+    }
+    
+  };
 }

@@ -11,6 +11,7 @@ import { FlavourModule } from './Flavour/flavour.module';
 import { CategoryModule } from './category/category.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { SeedModule } from './Seed/seed.module';
+import { ToppingModule } from './topping/topping.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SeedModule } from './Seed/seed.module';
     CategoryModule,
     SeedModule,
     CloudinaryModule,
+    ToppingModule,
   ],
   controllers: [AppController],
   providers: [],

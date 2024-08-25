@@ -7,6 +7,8 @@ import * as seedFlavours from '../../../data/flavour.data.json';
 import * as seedCategories from '../../../data/category.data.json';
 import { SeedData } from 'interfaces/data.interfaces';
 import { Role, User } from '../Users/entity/users.entity';
+import { Topping } from '../topping/entities/topping.entity';
+import { toppings } from '../../../data/toppings';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -17,6 +19,8 @@ export class SeedService implements OnModuleInit {
     private flavourRepository: Repository<Flavour>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Topping)
+    private toppingRepository: Repository<Topping>,
   ) {}
   async onModuleInit() {
     try {
@@ -34,6 +38,12 @@ export class SeedService implements OnModuleInit {
       await this.createAdminUser();
       Logger.log(
         'Usuario Admin cargado exitosamente.',
+        'PreloadData - Heladeria "Ice Cream"',
+      );
+
+      await this.preloadToppings();
+      Logger.log(
+        'Toppings cargados exitosamente.',
         'PreloadData - Heladeria "Ice Cream"',
       );
 
@@ -122,5 +132,26 @@ export class SeedService implements OnModuleInit {
       await this.userRepository.save(createUserAdmin);
     }
     
+  };
+
+  private async preloadToppings () {
+
+    try {
+
+      for await (const topping of toppings) {      
+        const existTopping = await this.toppingRepository.findOneBy({
+          name: topping.toLocaleLowerCase(),
+        });            
+        if (existTopping) continue;
+        
+        const newTopping = this.toppingRepository.create({
+          name: topping.toLocaleLowerCase(),
+        });
+        await this.toppingRepository.save(newTopping);
+      }
+
+    } catch (error) {
+      throw error;
+    }
   };
 }

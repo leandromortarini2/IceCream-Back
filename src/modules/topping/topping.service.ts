@@ -29,7 +29,6 @@ export class ToppingService {
     return message;
   }
 
-
   async findAll() {
     return await this.toppingRepository.find();
   }

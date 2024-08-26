@@ -15,7 +15,10 @@ export class CategoryService {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async create(categoryName: string) {
+  async create(input: string | CreateCategoryDto) {
+
+    const categoryName = typeof input === 'string' ? input : input.name;
+
     const existsCategory = await this.categoryRepository.findOne({
       where: { name: categoryName },
     });

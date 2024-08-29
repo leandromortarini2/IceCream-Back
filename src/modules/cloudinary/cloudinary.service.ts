@@ -8,7 +8,7 @@ export class CloudinaryService {
     try {
       return new Promise((resolve, reject) => {
         const upload = v2.uploader.upload_stream(
-          { resource_type: 'auto' },
+          { resource_type: 'auto', folder: 'products' },
           (error, result) => {
             if (error) {
               reject(error);

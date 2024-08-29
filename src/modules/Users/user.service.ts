@@ -1,20 +1,17 @@
 import {
-  BadRequestException,
-  ConflictException,
-  Inject,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './users.entity';
+import { User } from './entity/users.entity';
 import { Repository } from 'typeorm';
-import { createUserDto } from '../Auth/dto/createUser.dto';
 import { loginUserDto } from '../Auth/dto/loginUser.dto';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { createClerkClient } from '@clerk/clerk-sdk-node';
 
 const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
 @Injectable()
 export class UserService {
   constructor(
@@ -28,6 +25,8 @@ export class UserService {
     if (!clientList) throw new NotFoundException('Usuario Clerk no encontrado')
     const { firstName, lastName, emailAddresses } = clientList;
     const userEmail = emailAddresses[0].emailAddress;
+
+    if (userEmail !== process.env.EMAIL_ADMIN) throw new UnauthorizedException('No tienes permisos para ingresar al sitio');
 
     user = await this.userRepository.findOne({
       where: { email: userEmail },
@@ -51,10 +50,7 @@ export class UserService {
     await this.userRepository.update(user.id, { lastLogin: now });
 
     const {
-      username,
       name,
-      sucursal,
-      phone,
       email,
       validate,
       role,
@@ -67,41 +63,12 @@ export class UserService {
       success: 'Login Existoso',
       token,
       user: {
-        username,
         name,
-        sucursal,
-        phone,
         email,
         validate,
         role,
         lastLogin,
       },
     };
-  }
-
-  async createUser(user: createUserDto) {
-    {
-      const existEmail = await this.userRepository.findOne({
-        where: { email: user.email },
-      });
-      if (existEmail) throw new ConflictException('Email duplicado');
-      const existUsername = await this.userRepository.findOne({
-        where: { username: user.username },
-      });
-      if (existUsername) throw new ConflictException('Usuario duplicado');
-
-      const hashPassword = await bcrypt.hash(user.password, 10);
-      if (!hashPassword)
-        throw new BadRequestException('Password no pudo ser hasheada');
-
-      const newUser = this.userRepository.create({
-        ...user,
-        password: hashPassword,
-      });
-
-      await this.userRepository.save(newUser);
-
-      return { message: 'Usuario creado correctamente' };
-    }
   }
 }

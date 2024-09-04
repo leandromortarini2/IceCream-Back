@@ -25,14 +25,14 @@ export class UserService {
     if (!clientList) throw new NotFoundException('Usuario Clerk no encontrado');
     const { firstName, lastName, emailAddresses } = clientList;
     const userEmail = emailAddresses[0].emailAddress;
-
     if (
       userEmail !== process.env.EMAIL_ADMIN &&
       userEmail !== process.env.EMAIL_ADMIN2
-    )
+    ) {
       throw new UnauthorizedException(
         'No tienes permisos para ingresar al sitio',
       );
+    }
 
     user = await this.userRepository.findOne({
       where: { email: userEmail },

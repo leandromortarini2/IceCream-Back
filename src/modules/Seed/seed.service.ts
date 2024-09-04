@@ -44,18 +44,17 @@ export class SeedService implements OnModuleInit {
         'PreloadData - Heladeria "Ice Cream"',
       );
 
-      await this.preloadArrStringProducts( toppings, this.toppingRepository);
+      await this.preloadArrStringProducts(toppings, this.toppingRepository);
       Logger.log(
         'Toppings cargados exitosamente.',
         'PreloadData - Heladeria "Ice Cream"',
       );
 
-      await this.preloadArrStringProducts( salsas, this.salsaRepository);
+      await this.preloadArrStringProducts(salsas, this.salsaRepository);
       Logger.log(
         'Salsas cargadas exitosamente.',
         'PreloadData - Heladeria "Ice Cream"',
       );
-
     } catch (error) {
       console.error('Error en la precarga de datos:', error);
     }
@@ -112,7 +111,6 @@ export class SeedService implements OnModuleInit {
     nameField: string,
   ): Promise<void> {
     const entityObjects = names.map((name) => {
-
       if (repository.target === Flavour) {
         return { [nameField]: name, state: true };
       }
@@ -124,44 +122,59 @@ export class SeedService implements OnModuleInit {
     await repository.save(entities);
   }
 
-  private async createAdminUser () {
-    const userAdmin = await this.userRepository.findOneBy({
-      email: process.env.EMAIL_ADMIN,
-    });
-
-    if (!userAdmin) {
-      const createUserAdmin = this.userRepository.create({
+  private async createAdminUser() {
+    const adminUsers = [
+      {
         name: process.env.NAME_ADMIN,
         lastName: process.env.LAST_NAME_ADMIN,
         email: process.env.EMAIL_ADMIN,
-        validate: true,
-        role: Role.ADMIN,
-        lastLogin: new Date(),
+      },
+      {
+        name: process.env.NAME_ADMIN2,
+        lastName: process.env.LAST_NAME_ADMIN2,
+        email: process.env.EMAIL_ADMIN2,
+      },
+    ];
+    for (const admin of adminUsers) {
+      const userAdmin = await this.userRepository.findOne({
+        where: { email: admin.email },
       });
-      await this.userRepository.save(createUserAdmin);
-    }    
-  };
 
-  private async preloadArrStringProducts<T>(products: Array<string>, repository: Repository<T>,) {
+      if (!userAdmin) {
+        const createUserAdmin = this.userRepository.create({
+          name: admin.name,
+          lastName: admin.lastName,
+          email: admin.email,
+          validate: true,
+          role: Role.ADMIN,
+          lastLogin: new Date(),
+        });
 
+        await this.userRepository.save(createUserAdmin);
+      }
+    }
+  }
+
+  private async preloadArrStringProducts<T>(
+    products: Array<string>,
+    repository: Repository<T>,
+  ) {
     try {
-
-      for await (const product of products) {      
+      for await (const product of products) {
         const existProduct = await repository.findOneBy({
           name: product.toLocaleLowerCase(),
         } as unknown as FindOptionsWhere<T>);
 
-        if (existProduct) continue; 
-        
+        if (existProduct) continue;
+
         const newProduct = repository.create({
           name: product.toLocaleLowerCase(),
           state: true,
         } as T);
         await repository.save(newProduct);
       }
-
     } catch (error) {
       throw error;
     }
-  };
+  }
 }

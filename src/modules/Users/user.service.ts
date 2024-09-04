@@ -22,11 +22,17 @@ export class UserService {
   async loginUser(login: loginUserDto) {
     let user: User;
     const clientList = await clerk.users.getUser(login.userId);
-    if (!clientList) throw new NotFoundException('Usuario Clerk no encontrado')
+    if (!clientList) throw new NotFoundException('Usuario Clerk no encontrado');
     const { firstName, lastName, emailAddresses } = clientList;
     const userEmail = emailAddresses[0].emailAddress;
 
-    if (userEmail !== process.env.EMAIL_ADMIN) throw new UnauthorizedException('No tienes permisos para ingresar al sitio');
+    if (
+      userEmail !== process.env.EMAIL_ADMIN &&
+      userEmail !== process.env.EMAIL_ADMIN2
+    )
+      throw new UnauthorizedException(
+        'No tienes permisos para ingresar al sitio',
+      );
 
     user = await this.userRepository.findOne({
       where: { email: userEmail },
@@ -49,13 +55,7 @@ export class UserService {
     const now = new Date();
     await this.userRepository.update(user.id, { lastLogin: now });
 
-    const {
-      name,
-      email,
-      validate,
-      role,
-      lastLogin,
-    } = user;
+    const { name, email, validate, role, lastLogin } = user;
 
     const token = this.jwtService.sign(payload);
     console.log('token', token);

@@ -12,18 +12,25 @@ import {
   ParseFilePipe,
   UploadedFile,
   UsePipes,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ValidateImage } from 'src/pipes/ValidateImage.pipe';
+import { Roles } from 'src/decorators/role.decorator';
+import { Role } from '../Users/entity/users.entity';
+import { TokenGuard } from 'src/guards/token.guard';
+import { RoleGuard } from 'src/guards/role.guard';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
+  @UseGuards(TokenGuard, RoleGuard)
   @UseInterceptors(FileInterceptor('image'))
   @UsePipes(ValidateImage)
   create(
@@ -58,6 +65,8 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @Roles(Role.ADMIN)
+  @UseGuards(TokenGuard, RoleGuard)
   @UseInterceptors(FileInterceptor('image'))
   @UsePipes(ValidateImage)
   update(
@@ -83,6 +92,8 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
+  @UseGuards(TokenGuard, RoleGuard)
   remove(@Param('id') id: string) {
     return this.productService.remove(id);
   }

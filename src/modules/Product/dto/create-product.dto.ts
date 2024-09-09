@@ -16,7 +16,7 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(80)
-  @Matches(/^[A-Za-z0-9 ,\.¡!-]*$/, {
+  @Matches(/^[A-Za-z0-9 áéíóúÁÉÍÓÚ,\.¡!-]*$/, {
     message:
       'El nombre solo puede contener solo letras, números, comas y espacios',
   })

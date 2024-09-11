@@ -36,7 +36,15 @@ export class CreateProductDto {
   @IsPositive()
   price: number;
 
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true';
+    }
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'false';
+    }
+    return value;
+  })
   @IsOptional()
   @IsBoolean()
   state: boolean;
